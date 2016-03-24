@@ -59,7 +59,11 @@ update action model =
 
 view : Address Action -> Model -> Html
 view address model =
-  div [id "container"] [text model.fortune.message]
+  div [id "container"] [
+      text model.fortune.message
+    , text " "
+    , button [id "refresh-button"] [text "Refresh"]
+  ]
 
 
 -- Effects

@@ -11277,7 +11277,13 @@ Elm.FortuneCookie.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm);
    var _op = {};
-   var view = F2(function (address,model) {    return A2($Html.div,_U.list([$Html$Attributes.id("container")]),_U.list([$Html.text(model.fortune.message)]));});
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([$Html$Attributes.id("container")]),
+      _U.list([$Html.text(model.fortune.message)
+              ,$Html.text(" ")
+              ,A2($Html.button,_U.list([$Html$Attributes.id("refresh-button")]),_U.list([$Html.text("Refresh")]))]));
+   });
    var fortuneUrl = function (skip) {    return A2($Basics._op["++"],"http://fortunecookieapi.com/v1/fortunes?limit=1&skip=",$Basics.toString(skip));};
    var ReceiveFortune = function (a) {    return {ctor: "ReceiveFortune",_0: a};};
    var GetFortune = {ctor: "GetFortune"};
