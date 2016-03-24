@@ -62,7 +62,7 @@ view address model =
   div [id "container"] [
       text model.fortune.message
     , text " "
-    , button [id "refresh-button"] [text "Refresh"]
+    , button [onClick address GetFortune, id "refresh-button"] [text "Refresh"]
   ]
 
 
@@ -73,7 +73,7 @@ getFortune =
   Http.get decodeFortuneList
     ( fortuneUrl
       ( fst ( Random.generate
-        ( Random.int 0 20 )
+        ( Random.int 0 30 )
         ( Random.initialSeed Native.NativeTime.currentTime)
       )
     ) )

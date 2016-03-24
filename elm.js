@@ -11267,6 +11267,7 @@ Elm.FortuneCookie.make = function (_elm) {
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $Http = Elm.Http.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
@@ -11277,16 +11278,18 @@ Elm.FortuneCookie.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Task = Elm.Task.make(_elm);
    var _op = {};
+   var fortuneUrl = function (skip) {    return A2($Basics._op["++"],"http://fortunecookieapi.com/v1/fortunes?limit=1&skip=",$Basics.toString(skip));};
+   var ReceiveFortune = function (a) {    return {ctor: "ReceiveFortune",_0: a};};
+   var GetFortune = {ctor: "GetFortune"};
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([$Html$Attributes.id("container")]),
       _U.list([$Html.text(model.fortune.message)
               ,$Html.text(" ")
-              ,A2($Html.button,_U.list([$Html$Attributes.id("refresh-button")]),_U.list([$Html.text("Refresh")]))]));
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,GetFortune),$Html$Attributes.id("refresh-button")]),
+              _U.list([$Html.text("Refresh")]))]));
    });
-   var fortuneUrl = function (skip) {    return A2($Basics._op["++"],"http://fortunecookieapi.com/v1/fortunes?limit=1&skip=",$Basics.toString(skip));};
-   var ReceiveFortune = function (a) {    return {ctor: "ReceiveFortune",_0: a};};
-   var GetFortune = {ctor: "GetFortune"};
    var Model = function (a) {    return {fortune: a};};
    var Fortune = F2(function (a,b) {    return {id: a,message: b};});
    var defaultFortune = A2(Fortune,"0","Loading your fortune...");
@@ -11300,7 +11303,7 @@ Elm.FortuneCookie.make = function (_elm) {
    ReceiveFortune,
    $Task.toMaybe(A2($Http.get,
    decodeFortuneList,
-   fortuneUrl($Basics.fst(A2($Random.generate,A2($Random.$int,0,20),$Random.initialSeed($Native$NativeTime.currentTime))))))));
+   fortuneUrl($Basics.fst(A2($Random.generate,A2($Random.$int,0,30),$Random.initialSeed($Native$NativeTime.currentTime))))))));
    var init = {ctor: "_Tuple2",_0: {fortune: defaultFortune},_1: getFortune};
    var update = F2(function (action,model) {
       var _p0 = action;
