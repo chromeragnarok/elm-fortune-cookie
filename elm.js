@@ -11247,17 +11247,11 @@ Elm.Native.NativeTime.make = function(elm) {
   elm.Native = elm.Native || {};
   elm.Native.NativeTime = elm.Native.NativeTime || {};
 
-  var Task = Elm.Native.Task.make(elm);
-
-  var getCurrentTime = Task.asyncFunction(function(callback){
-    return callback(Task.succeed(Date.now()));
-  });
-
   if (!!elm.Native.NativeTime.values) {
     return elm.Native.NativeTime.values;
   } else {
     return elm.Native.NativeTime.values = {
-      getCurrentTime: getCurrentTime
+      currentTime: Date.now()
     }
   }
 }
@@ -11285,48 +11279,42 @@ Elm.FortuneCookie.make = function (_elm) {
    var _op = {};
    var view = F2(function (address,model) {    return A2($Html.div,_U.list([$Html$Attributes.id("container")]),_U.list([$Html.text(model.fortune.message)]));});
    var fortuneUrl = function (skip) {    return A2($Basics._op["++"],"http://fortunecookieapi.com/v1/fortunes?limit=1&skip=",$Basics.toString(skip));};
-   var GetCurrentTime = function (a) {    return {ctor: "GetCurrentTime",_0: a};};
-   var getCurrentTime = $Effects.task(A2($Task.map,GetCurrentTime,$Native$NativeTime.getCurrentTime));
    var ReceiveFortune = function (a) {    return {ctor: "ReceiveFortune",_0: a};};
    var GetFortune = {ctor: "GetFortune"};
-   var Model = F2(function (a,b) {    return {fortune: a,currentTime: b};});
+   var Model = function (a) {    return {fortune: a};};
    var Fortune = F2(function (a,b) {    return {id: a,message: b};});
    var defaultFortune = A2(Fortune,"0","Loading your fortune...");
-   var init = {ctor: "_Tuple2",_0: {fortune: defaultFortune,currentTime: 1},_1: getCurrentTime};
    var getFirstElement = function (fortuneList) {    return A2($Maybe.withDefault,defaultFortune,$List.head(fortuneList));};
    var decodeFortune = A3($Json$Decode.object2,
    Fortune,
    A2($Json$Decode._op[":="],"id",$Json$Decode.string),
    A2($Json$Decode._op[":="],"message",$Json$Decode.string));
    var decodeFortuneList = A2($Json$Decode.object1,getFirstElement,$Json$Decode.list(decodeFortune));
-   var getFortune = function (currentTime) {
-      return $Effects.task(A2($Task.map,
-      ReceiveFortune,
-      $Task.toMaybe(A2($Http.get,decodeFortuneList,fortuneUrl($Basics.fst(A2($Random.generate,A2($Random.$int,0,20),$Random.initialSeed(currentTime))))))));
-   };
+   var getFortune = $Effects.task(A2($Task.map,
+   ReceiveFortune,
+   $Task.toMaybe(A2($Http.get,
+   decodeFortuneList,
+   fortuneUrl($Basics.fst(A2($Random.generate,A2($Random.$int,0,20),$Random.initialSeed($Native$NativeTime.currentTime))))))));
+   var init = {ctor: "_Tuple2",_0: {fortune: defaultFortune},_1: getFortune};
    var update = F2(function (action,model) {
       var _p0 = action;
-      switch (_p0.ctor)
-      {case "GetFortune": return {ctor: "_Tuple2",_0: model,_1: getCurrentTime};
-         case "ReceiveFortune": return {ctor: "_Tuple2"
-                                       ,_0: {fortune: A2($Maybe.withDefault,defaultFortune,_p0._0),currentTime: model.currentTime}
-                                       ,_1: $Effects.none};
-         default: var currentTime = A2($Maybe.withDefault,model.currentTime,A2($Debug.log,"maybe time",_p0._0));
-           return {ctor: "_Tuple2",_0: {fortune: model.fortune,currentTime: A2($Debug.log,"actual current time",currentTime)},_1: getFortune(currentTime)};}
+      if (_p0.ctor === "GetFortune") {
+            return {ctor: "_Tuple2",_0: model,_1: getFortune};
+         } else {
+            return {ctor: "_Tuple2",_0: {fortune: A2($Maybe.withDefault,defaultFortune,_p0._0)},_1: $Effects.none};
+         }
    });
    return _elm.FortuneCookie.values = {_op: _op
                                       ,Fortune: Fortune
                                       ,Model: Model
                                       ,GetFortune: GetFortune
                                       ,ReceiveFortune: ReceiveFortune
-                                      ,GetCurrentTime: GetCurrentTime
                                       ,defaultFortune: defaultFortune
                                       ,init: init
                                       ,fortuneUrl: fortuneUrl
                                       ,update: update
                                       ,view: view
                                       ,getFortune: getFortune
-                                      ,getCurrentTime: getCurrentTime
                                       ,decodeFortuneList: decodeFortuneList
                                       ,getFirstElement: getFirstElement
                                       ,decodeFortune: decodeFortune};
