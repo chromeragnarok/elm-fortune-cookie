@@ -19,9 +19,10 @@ type alias Fortune =
   { id: String, message : String }
 
 type alias Model =
-  { fortune: Fortune }
+  { fortune: Fortune, currentTime: Int }
 
 type Action = GetFortune
+              | ReceiveCurrentTime (Maybe Int)
               | ReceiveFortune (Maybe Fortune)
 
 
@@ -33,8 +34,9 @@ defaultFortune =
 init : (Model, Effects Action)
 init =
   ({
-    fortune = defaultFortune
-  }, getFortune)
+    fortune = defaultFortune,
+    currentTime = 1
+  }, getCurrentTime)
 
 
 fortuneUrl : Int -> String
@@ -47,12 +49,24 @@ update action model =
   -- (model, Effects.none)
   case action of
     GetFortune ->
-      (model, getFortune)
+      (model, getCurrentTime)
+
+    ReceiveCurrentTime maybeTime ->
+      let
+        currentTime = Maybe.withDefault model.currentTime maybeTime
+      in
+          ( {
+              fortune = model.fortune
+            , currentTime = currentTime
+            }
+          , getFortune currentTime
+          )
 
     ReceiveFortune maybeFortune ->
       ( {
-        fortune =
-          Maybe.withDefault defaultFortune maybeFortune
+          fortune =
+            Maybe.withDefault defaultFortune maybeFortune
+          , currentTime = model.currentTime
         }
       , Effects.none
       )
@@ -68,18 +82,26 @@ view address model =
 
 -- Effects
 
-getFortune : Effects Action
-getFortune =
+getFortune : Int -> Effects Action
+getFortune currentTime =
   Http.get decodeFortuneList
     ( fortuneUrl
       ( fst ( Random.generate
         ( Random.int 0 30 )
-        ( Random.initialSeed Native.NativeTime.currentTime)
+        ( Random.initialSeed currentTime)
       )
     ) )
-  |> Task.toMaybe
-  |> Task.map ReceiveFortune
-  |> Effects.task
+    |> Task.toMaybe
+    |> Task.map ReceiveFortune
+    |> Effects.task
+
+
+getCurrentTime : Effects Action
+getCurrentTime =
+  Native.NativeTime.getCurrentTime
+    |> Task.toMaybe
+    |> Task.map ReceiveCurrentTime
+    |> Effects.task
 
 
 decodeFortuneList : Decoder Fortune
@@ -97,6 +119,3 @@ decodeFortune =
   Decode.object2 Fortune
     ( "id" := Decode.string )
     ( "message" := Decode.string)
-
-
--- Main
